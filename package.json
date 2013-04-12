@@ -2,11 +2,11 @@
   "name": "bitly2",
   "version": "0.0.0",
   "description": "OAuth Nodejs Module for bitly. As well as my cover letter for the API Hacker Job",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
     "test": "none"
   },
-  "repository": "",
+  "repository": "https://github.com/elbuo8/bitly2",
   "keywords": [
     "bitly",
     "oauth",
@@ -15,7 +15,7 @@
     "short"
   ],
   "author": "elbuo8 (Yamil Asusta)",
-  "license": "BSD",
+  "license": "MIT",
   "dependencies": {
     "request": "~2.16.6"
   }

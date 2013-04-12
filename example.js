@@ -11,6 +11,8 @@
       }, function(error, result) {
         if (!error) {
           return console.log(result);
+        } else {
+          return console.log(error);
         }
       });
     }
