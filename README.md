@@ -36,7 +36,7 @@ bitly = new bitlyClient(process.env.bitly_user, process.env.bitly_password, func
     });
   }
 });
-
+```
 
 ## Why?
 
