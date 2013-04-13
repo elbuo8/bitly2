@@ -19,7 +19,7 @@ npm install bitly2
 
 ## Usage ##
 
-```
+```javascript
 var bitly, bitlyClient;
 
 bitlyClient = require('bitly2');
