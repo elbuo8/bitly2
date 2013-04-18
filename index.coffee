@@ -34,6 +34,6 @@ class bitly
       'url' : @url + endpoint + '?' + querystring.stringify(parameters)
       
     request.get params, (error, response, body) ->
-      callback(error, body)
+      if response.statusCode == 200 then callback(error, JSON.parse body) else callback(JSON.parse body, null)
     
 module.exports = bitly

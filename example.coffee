@@ -1,7 +1,7 @@
-bitlyClient = require 'bitly2' 
+bitlyClient = require './index' 
 
 
-bitly = new bitlyClient process.env.bitly_user, process.env.bitly_password, (error) ->
+bitly = new bitlyClient process.env.user, process.env.password, (error) ->
   if !error
     bitly.get 'highvalue', {'limit': 2}, (error, result) ->
-      if !error then console.log result else console.log error
+      console.log if !error then result else error

@@ -2,18 +2,14 @@
 (function() {
   var bitly, bitlyClient;
 
-  bitlyClient = require('bitly2');
+  bitlyClient = require('./index');
 
-  bitly = new bitlyClient(process.env.bitly_user, process.env.bitly_password, function(error) {
+  bitly = new bitlyClient(process.env.user, process.env.password, function(error) {
     if (!error) {
       return bitly.get('highvalue', {
         'limit': 2
       }, function(error, result) {
-        if (!error) {
-          return console.log(result);
-        } else {
-          return console.log(error);
-        }
+        return console.log(!error ? result : error);
       });
     }
   });

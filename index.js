@@ -40,7 +40,11 @@
         'url': this.url + endpoint + '?' + querystring.stringify(parameters)
       };
       return request.get(params, function(error, response, body) {
-        return callback(error, body);
+        if (response.statusCode === 200) {
+          return callback(error, JSON.parse(body));
+        } else {
+          return callback(JSON.parse(body, null));
+        }
       });
     };
 

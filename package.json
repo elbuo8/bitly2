@@ -1,6 +1,6 @@
 {
   "name": "bitly2",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "OAuth Nodejs Module for bitly. As well as my cover letter for the API Hacker Job",
   "main": "./index.js",
   "scripts": {
