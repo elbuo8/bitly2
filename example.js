@@ -4,13 +4,15 @@
 
   bitlyClient = require('./index');
 
-  bitly = new bitlyClient(process.env.user, process.env.password, function(error) {
+  bitly = new bitlyClient(process.env.user, process.env.pwd, function(error) {
     if (!error) {
       return bitly.get('highvalue', {
-        'limit': 2
+        limit: 3
       }, function(error, result) {
         return console.log(!error ? result : error);
       });
+    } else {
+      return console.log(error);
     }
   });
 

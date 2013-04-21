@@ -22,11 +22,11 @@
         'headers': headers
       };
       request.post(params, function(error, response, body) {
-        if (!error) {
+        if (response.statusCode === 200) {
           _this.access_token = body;
           return callback();
         } else {
-          return callback(error);
+          return callback(body);
         }
       });
       this.url = 'https://api-ssl.bitly.com/v3/';
@@ -35,6 +35,10 @@
     bitly.prototype.get = function(endpoint, parameters, callback) {
       var params;
 
+      if (arguments.length === 2) {
+        callback = parameters;
+        parameters = {};
+      }
       parameters.access_token = this.access_token;
       params = {
         'url': this.url + endpoint + '?' + querystring.stringify(parameters)
