@@ -1,0 +1,255 @@
+<!doctype html>
+<html ng-app="app">
+  <header>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.1/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular-resource.min.js"></script>
+
+    <script language="javascript" type="text/javascript">
+      angular.module('app', ['ngResource']);
+      function BackendController($scope,$resource){
+      
+        $scope.gaEvent = function($event){
+          $scope.clicked = $event.target.name;
+          //Call your own backend to log an event.
+          $scope.log_event($scope.clicked);
+        };
+        
+        $scope.backend_locations = [
+          {url : 'code-comparison.appspot.com', urlName : 'remote backend' },       
+          {url : 'localhost:8080', urlName : 'localhost' } ];
+
+        $scope.showdetails = false;
+        $scope.apikey = "Aloha";
+        
+        //Replace this url with your final URL from the SingPath API path. 
+        //$scope.remote_url = "localhost:8080";
+        $scope.remote_url = "code-comparison.appspot.com";
+        $scope.model = "message";
+        $scope.waiting = "Ready";
+        
+        $scope.item = {};
+        $scope.item.data = {"message": "Hi Yamil"};
+        
+        //resource calls are defined here
+
+        $scope.Model = $resource('http://:remote_url/:apikey/:model_type/:id',
+                                {},{'get': {method: 'JSONP', isArray: false, params:{callback: 'JSON_CALLBACK'}}
+                                   }
+                            );
+
+        $scope.update = function(id){
+          $scope.UpdateResource = $resource('http://:remote_url/:apikey/:model/:id', 
+                        {"remote_url":$scope.remote_url,"apikey":$scope.apikey,"model":$scope.model, "id":id }, 
+                        {'update': { method: 'PUT',    params: {} }});
+          
+          var item = new $scope.UpdateResource($scope.item.data);
+          $scope.waiting = "Loading";
+          item.$update(function(response) { 
+                  $scope.item = response;
+                  $scope.list();
+                  $scope.waiting = "Ready";
+                });
+        };
+        
+        $scope.add = function(){
+          $scope.SaveResource = $resource('http://:remote_url/:apikey/:model', 
+                        {"remote_url":$scope.remote_url,"apikey":$scope.apikey,"model":$scope.model}, 
+                        {'save': { method: 'POST',    params: {} }});
+       
+          $scope.waiting = "Loading";
+          var item = new $scope.SaveResource($scope.item.data);
+          $scope.item = item.$save(function(response) { 
+                  $scope.item = response;
+                  $scope.list();
+                  $scope.waiting = "Ready";
+                }); 
+        };
+        
+        $scope.list = function(){
+          data = {'remote_url':$scope.remote_url,
+                  'model_type':$scope.model,
+                  'apikey':$scope.apikey
+                 }
+          $scope.waiting = "Updating";       
+          $scope.Model.get(data,
+                function(response) { 
+                  $scope.items = response;
+                  $scope.waiting = "Ready";
+                });  
+        };
+                
+        $scope.load = function(id){
+          data = {'remote_url':$scope.remote_url,
+                  'model_type':$scope.model,
+                  'apikey':$scope.apikey, 
+                  'id': id
+                }
+          $scope.waiting = "Loading";
+          $scope.Model.get(data, 
+              function(response){   
+                  $scope.item = response;
+                  $scope.item_data = $scope.item.data;
+                  $scope.waiting = "Ready";  
+              });        
+        };
+        
+        $scope.delete = function(id){
+          data = {'remote_url':$scope.remote_url,
+                  'model_type':$scope.model,
+                  'apikey':$scope.apikey, 
+                  'id': id
+                }
+          $scope.waiting = "Deleting";      
+          $scope.Model.remove(data, 
+              function(response){
+                  $scope.waiting = "Ready";
+                  $scope.list();
+              });
+        };
+        //To add key/value pairs when creating new objects
+        $scope.add_key_to_item = function(){
+          $scope.item.data[$scope.newItemKey] = $scope.newItemValue;
+          $scope.newItemKey = "";
+          $scope.newItemValue = "";
+        };
+        
+        $scope.get_metadata = function(){
+          data = {'remote_url':$scope.remote_url,
+                  'model_type':"metadata",
+                  'apikey':$scope.apikey
+                 }
+          $scope.waiting = "Updating";       
+          $scope.Model.get(data,
+                function(response) { 
+                  $scope.metadata = response;
+                  $scope.waiting = "Ready";
+                });  
+        };
+        
+        $scope.log_event = function(message){
+          data = {'remote_url':$scope.remote_url,
+                  'model_type':"log",
+                  'apikey':$scope.apikey, 
+                  'obj': JSON.stringify({"message":message})
+                }
+          $scope.Model.get(data, 
+              function(response){
+                  $scope.last_log = response;
+              });
+        
+        };
+        
+        $scope.list();         
+      }
+    </script>
+  </header>
+  <body ng-controller="BackendController" ng-click="gaEvent($event)">
+    
+    Example app: <hr>
+    Please leave a message:<br>
+    <input type="text" ng-model="item.data.message">
+
+      <input ng-click="add()" type="submit" name="add new item" value="Submit">
+
+    <ul>
+      <li ng-repeat="entity in items.entities">
+          <pre>{{entity.data.message}}</pre>
+      </li>
+    </ul>
+
+    
+    <!-- You can hide this setup code once you've configured your app -->
+    <!-- This checkbox will hide everything in the DIV below or show it all. -->
+    <hr>      
+    <input type="checkbox" ng-model="showdetails"> Show Angularjs details.
+
+  
+  <div ng-show="showdetails">
+    <h3>Angular is used to edit any items on a remote backend using a specific apikey.</h3>
+    Current backend:<br>   
+    <select ng-model="remote_url" ng-options="item.url as item.urlName for item in backend_locations"></select>
+    Base URL: {{remote_url}} <br>
+    <hr>
+      You can change this apikey to be any string so that you won't conflict with others.<br>
+      <form ng-submit="get_metadata()">
+        Current API Key: <input type="text" ng-model="apikey"><br>
+        <input type="submit" name="get metadata" value="get metadata">
+        (See what is currently stored for the apikey.)
+      </form>
+      Metadata: <pre>{{metadata}}</pre>
+    <hr>
+    Update the list of models for the apikey.<br>
+    <form ng-submit="list()">  
+      Model: <input type="text" ng-model="model" placeholder="user">
+      <input type="submit" name="list" value="list">
+    </form>  
+    
+    <hr>
+    <!-- Here is a good place to comment out everythign above once you are configured. -->
+    
+    <hr>
+    
+    There are {{items.entities.length}} items for {{model}}. Status: {{waiting}}
+    <table>
+      <th ng-repeat="(key,val) in items.entities[0]">
+          {{key}}
+      <th>
+      <th>Delete</th>
+    
+      <tr ng-repeat="item in items.entities">
+    
+        <td ng-repeat="(key,val) in item">
+          {{val}}
+        </td>
+        <td>
+          <form ng-submit="load(item['id'])">
+            <input type="submit" name="load" value="load">
+          </form>
+        </td>
+        <td>
+          <form ng-submit="delete(item['id'])">
+            <input type="submit" name="delete" value="delete">
+          </form>
+        </td>
+      </tr>
+    </table>
+      
+ <hr>
+    Item Data:
+      <table>
+          <tr>
+            <td>ID:</td>
+            <td><input type="text" ng-model="item.id"></td>
+          </tr>
+          <tr>
+            <td>message:</td>
+            <td><input type="text" ng-model="item.data.message"></td>
+          </tr>
+        <!-- You could dynamically show all key-value pairs in the item.data
+        <tr ng-repeat="(key,val) in item.data">
+          <td>{{key}}:</td> 
+          <td><input type="text" ng-model="item.data[key]"></td>
+        </tr>
+
+        <tr>
+          <td><input type="text" ng-model="newItemKey" placeholder="add key here"></td>
+          <td><input type="text" ng-model="newItemValue" placeholder="add value here"></td>
+          <td>
+            <form ng-submit="add_key_to_item()">
+              <input type="submit" value="Add key/value pair."> 
+            </form>
+          </td>
+        </tr>
+        -->
+
+      </table>
+
+    <form ng-submit="add()">
+      <input type="submit" name="add new item" value="add new item (with POST)">
+    </form>
+    <form ng-submit="update(item.id)">
+      <input type="submit" value="update item {{item.id}} (with PUT)">
+    </form>
+  </div>
+  </body>
+</html>
